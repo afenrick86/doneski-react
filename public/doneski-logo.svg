@@ -1,0 +1,17 @@
+<svg width="370" height="100" viewBox="0 0 370 100" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Badge circle -->
+  <circle cx="44" cy="44" r="40" fill="#2c62ba"/>
+
+  <!-- Checkmark inside circle -->
+  <polyline points="24,46 36,58 64,30" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Wordmark -->
+  <text x="96" y="62" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="56" fill="#1a1a1a" letter-spacing="-1">Doneski</text>
+
+  <!-- Tagline -->
+  <text x="98" y="80" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="12" fill="#444444" letter-spacing="3">GET IT DONE</text>
+
+  <!-- Underline accent -->
+  <line x1="98" y1="87" x2="362" y2="87" stroke="#2c62ba" stroke-width="2" stroke-linecap="round"/>
+</svg>
