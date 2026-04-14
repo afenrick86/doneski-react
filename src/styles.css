@@ -422,7 +422,9 @@ section h2 {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .cal-header {
@@ -468,14 +470,12 @@ section h2 {
 
 /* Today gets a dark ring */
 .cal-today {
-  outline: 3px solid #1C1C1E;
-  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #1C1C1E;
 }
 
 /* Selected day gets a blue ring */
 .cal-selected {
-  outline: 3px solid #2c62ba;
-  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #2c62ba;
 }
 
 .cal-day[style*="pointer"]:hover {
@@ -1458,7 +1458,7 @@ section h2 {
 
   /* Calendar: tighter cells, smaller text */
   .calendar-grid {
-    gap: 3px;
+    gap: 6px;
   }
 
   .cal-day {
