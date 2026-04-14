@@ -215,10 +215,9 @@ export default function KidDetailView() {
     <>
       <Header />
       <div id="kid-view">
-        {userRole === "kid"
-          ? <button id="back-btn" onClick={signOut}>Sign Out</button>
-          : <button id="back-btn" onClick={() => navigate("/")}>← Back</button>
-        }
+        {userRole !== "kid" && (
+          <button id="back-btn" onClick={() => navigate("/")}>← Back</button>
+        )}
 
         <KidHeader kid={kid} goalConfig={goalConfig} onPhotoChange={handlePhotoChange} />
 
@@ -246,6 +245,12 @@ export default function KidDetailView() {
           <h2>Progress &amp; Reward</h2>
           <ProgressSection kidId={kidId} log={log} goalConfig={goalConfig} kid={kid} />
         </section>
+
+        {userRole === "kid" && (
+          <div id="kid-signout-wrap">
+            <button id="kid-signout-btn" onClick={signOut}>Sign Out</button>
+          </div>
+        )}
       </div>
       <Footer />
     </>
