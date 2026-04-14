@@ -11,12 +11,10 @@ export default function PinModal() {
 
   const kid = kids.find(k => k.id === pinModalKidId);
 
-  // Focus first input whenever modal opens
   useEffect(() => {
     if (pinModalKidId) {
       setDigits(["", "", "", ""]);
       setError(false);
-      setTimeout(() => inputRefs[0].current?.focus(), 50);
     }
   }, [pinModalKidId]);
 
@@ -71,6 +69,7 @@ export default function PinModal() {
               pattern="[0-9]"
               maxLength={1}
               value={d}
+              autoFocus={i === 0}
               onChange={e => handleChange(i, e.target.value)}
               onKeyDown={e => handleKeyDown(i, e)}
             />
