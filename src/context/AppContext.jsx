@@ -1,6 +1,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { signInAnonymously } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase.js";
+import {
+  signIn as authSignIn,
+  signOut as authSignOut,
+  createParentAccount as authCreateParent,
+  createKidAuthAccount,
+  resetKidPassword as authResetKidPassword,
+  getUserDoc,
+} from "../services/auth.js";
 import { fetchKids, saveKidDoc, deleteKidDoc } from "../services/kids.js";
 import { fetchLog, saveLogEntry } from "../services/log.js";
 import { fetchGoalConfig, saveGoalConfig } from "../services/settings.js";
@@ -29,50 +37,97 @@ const DEFAULT_KIDS = [
 
 const AppContext = createContext(null);
 
-export function AppProvider({ children, navigate }) {
+export function AppProvider({ children }) {
+  // Auth state
+  const [authLoading, setAuthLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState(null); // "parent" | "kid" | null
+  const [userKidId, setUserKidId] = useState(null);
+
+  // App data state
   const [kids, setKids] = useState([]);
   const [log, setLog] = useState([]);
   const [goalConfig, setGoalConfig] = useState({ ...DEFAULT_GOAL_CONFIG });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [pinModalKidId, setPinModalKidId] = useState(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
-    async function init() {
-      await signInAnonymously(auth);
-
-      let loadedKids = await fetchKids();
-      if (loadedKids.length === 0) {
-        for (const kid of DEFAULT_KIDS) {
-          await saveKidDoc(kid.id, kid);
-        }
-        loadedKids = DEFAULT_KIDS;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.isAnonymous) {
+        // Legacy anonymous session — sign out and require real login
+        await authSignOut();
+        return;
       }
 
-      const loadedConfig = await fetchGoalConfig();
-      const loadedLog = await fetchLog();
+      if (user) {
+        setCurrentUser(user);
+        const userDoc = await getUserDoc(user.uid);
+        setUserRole(userDoc?.role || null);
+        setUserKidId(userDoc?.kidId || null);
 
-      setKids(loadedKids);
-      setGoalConfig(loadedConfig || { ...DEFAULT_GOAL_CONFIG });
-      setLog(loadedLog);
-      setLoading(false);
-    }
-    init();
+        setLoading(true);
+        let loadedKids = await fetchKids();
+        if (loadedKids.length === 0) {
+          for (const kid of DEFAULT_KIDS) {
+            await saveKidDoc(kid.id, kid);
+          }
+          loadedKids = DEFAULT_KIDS;
+        }
+        const loadedConfig = await fetchGoalConfig();
+        const loadedLog = await fetchLog();
+        setKids(loadedKids);
+        setGoalConfig(loadedConfig || { ...DEFAULT_GOAL_CONFIG });
+        setLog(loadedLog);
+        setLoading(false);
+      } else {
+        setCurrentUser(null);
+        setUserRole(null);
+        setUserKidId(null);
+        setKids([]);
+        setLog([]);
+      }
+      setAuthLoading(false);
+    });
+    return unsubscribe;
   }, []);
+
+  // ─── Auth actions ────────────────────────────────────────────────────────────
+
+  const signIn = useCallback(async (username, password) => {
+    await authSignIn(username, password);
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await authSignOut();
+  }, []);
+
+  const createParentAccount = useCallback(async (username, password) => {
+    await authCreateParent(username, password);
+  }, []);
+
+  const createKidAccount = useCallback(async (kidId, username, password) => {
+    const { uid, username: savedUsername } = await createKidAuthAccount(kidId, username, password);
+    const kid = kids.find(k => k.id === kidId);
+    const updated = { ...kid, uid, username: savedUsername };
+    await saveKidDoc(kidId, updated);
+    setKids(prev => prev.map(k => k.id === kidId ? updated : k));
+  }, [kids]);
+
+  const resetKidPassword = useCallback(async (username, currentPassword, newPassword) => {
+    await authResetKidPassword(username, currentPassword, newPassword);
+  }, []);
+
+  // ─── UI actions ──────────────────────────────────────────────────────────────
 
   const showToast = useCallback((message) => {
     setToastMessage(message);
   }, []);
 
   const requestKidAccess = useCallback((kidId, navigateFn) => {
-    const kid = kids.find(k => k.id === kidId);
-    if (kid?.pin) {
-      setPinModalKidId(kidId);
-    } else {
-      navigateFn(`/kid/${kidId}`);
-    }
-  }, [kids]);
+    navigateFn(`/kid/${kidId}`);
+  }, []);
 
   const closePinModal = useCallback(() => {
     setPinModalKidId(null);
@@ -80,6 +135,8 @@ export function AppProvider({ children, navigate }) {
 
   const openFeedbackModal = useCallback(() => setFeedbackModalOpen(true), []);
   const closeFeedbackModal = useCallback(() => setFeedbackModalOpen(false), []);
+
+  // ─── Data mutations ──────────────────────────────────────────────────────────
 
   const logEntry = useCallback(async (kidId, date, completed) => {
     setLog(prev => {
@@ -140,10 +197,12 @@ export function AppProvider({ children, navigate }) {
 
   return (
     <AppContext.Provider value={{
+      authLoading, currentUser, userRole, userKidId,
       kids, log, goalConfig, loading,
       toastMessage, setToastMessage,
       pinModalKidId, setPinModalKidId,
       feedbackModalOpen,
+      signIn, signOut, createParentAccount, createKidAccount, resetKidPassword,
       showToast,
       requestKidAccess,
       closePinModal,

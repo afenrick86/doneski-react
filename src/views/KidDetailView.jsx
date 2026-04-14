@@ -171,7 +171,7 @@ function ProgressSection({ kidId, log, goalConfig, kid }) {
 export default function KidDetailView() {
   const { kidId } = useParams();
   const navigate = useNavigate();
-  const { kids, log, goalConfig, logEntry, autoLogToday, saveKid, showToast } = useApp();
+  const { kids, log, goalConfig, logEntry, autoLogToday, saveKid, showToast, signOut, userRole } = useApp();
   const [selectedDate, setSelectedDate] = useState(null);
   const photoPreviewRef = useRef(null);
 
@@ -215,7 +215,10 @@ export default function KidDetailView() {
     <>
       <Header />
       <div id="kid-view">
-        <button id="back-btn" onClick={() => navigate("/")}>← Back</button>
+        {userRole === "kid"
+          ? <button id="back-btn" onClick={signOut}>Sign Out</button>
+          : <button id="back-btn" onClick={() => navigate("/")}>← Back</button>
+        }
 
         <KidHeader kid={kid} goalConfig={goalConfig} onPhotoChange={handlePhotoChange} />
 

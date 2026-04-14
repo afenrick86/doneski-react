@@ -1503,3 +1503,245 @@ section h2 {
     font-size: 0.8rem;
   }
 }
+
+
+/* =====================
+   GROUP STATS BAR (Home)
+   ===================== */
+
+#group-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  max-width: 1100px;
+  margin: 0 auto 20px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.group-stat strong {
+  color: #1C1C1E;
+}
+
+.group-stat-divider {
+  color: #D1D5DB;
+}
+
+
+/* =====================
+   HOME FOOTER ACTIONS
+   ===================== */
+
+#home-footer-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.home-action-btn {
+  padding: 9px 22px;
+  background-color: #2c62ba;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-action-btn:hover {
+  background-color: #1e4d9a;
+}
+
+.home-action-btn--ghost {
+  background-color: transparent;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+  font-weight: 400;
+}
+
+.home-action-btn--ghost:hover {
+  background-color: #F3F4F6;
+  color: #1C1C1E;
+}
+
+
+/* =====================
+   LOGIN VIEW
+   ===================== */
+
+#login-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+#login-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+#login-logo {
+  height: 80px;
+  width: auto;
+}
+
+#login-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin: 0;
+}
+
+.login-hint {
+  font-size: 0.85rem;
+  color: #6B7280;
+  text-align: center;
+  line-height: 1.5;
+}
+
+#login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-error {
+  color: #DC2626;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+#login-submit-btn {
+  width: 100%;
+  padding: 11px;
+  background-color: #2c62ba;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+#login-submit-btn:hover:not(:disabled) {
+  background-color: #1e4d9a;
+}
+
+#login-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#login-switch-btn {
+  background: none;
+  border: none;
+  color: #2c62ba;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+#login-switch-btn:hover {
+  color: #1e4d9a;
+}
+
+
+/* =====================
+   KID LOGIN MANAGEMENT (Settings)
+   ===================== */
+
+.login-status-text {
+  font-size: 0.9rem;
+  color: #374151;
+  margin: 4px 0 0;
+}
+
+.btn-setup-login {
+  margin-top: 4px;
+  padding: 7px 14px;
+  background-color: #F3F4F6;
+  color: #1C1C1E;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn-setup-login:hover {
+  background-color: #E5E7EB;
+}
+
+.kid-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.kid-login-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.login-field-error {
+  color: #DC2626;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.kid-login-form-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+
+/* =====================
+   SIGN OUT BUTTON (Dashboard)
+   ===================== */
+
+#sign-out-btn {
+  padding: 9px 20px;
+  background-color: transparent;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+#sign-out-btn:hover {
+  background-color: #F3F4F6;
+  color: #1C1C1E;
+}

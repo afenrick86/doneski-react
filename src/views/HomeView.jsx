@@ -34,24 +34,46 @@ function KidCard({ kid, log, goalConfig, onPress }) {
 }
 
 export default function HomeView() {
-  const { kids, log, goalConfig, requestKidAccess } = useApp();
+  const { kids, log, goalConfig, requestKidAccess, signOut } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const sorted = kids
-    .filter(k => !k.archived)
-    .sort((a, b) => (a.dob < b.dob ? -1 : 1));
+  const activeKids = kids.filter(k => !k.archived);
+  const sorted = activeKids.slice().sort((a, b) => (a.dob < b.dob ? -1 : 1));
+
+  let totalPercent = 0;
+  let goalsAchieved = 0;
+  activeKids.forEach(kid => {
+    const progress = getGoalProgress(kid.id, log, goalConfig);
+    totalPercent += progress.percent;
+    if (progress.achieved) goalsAchieved++;
+  });
+  const groupRate = activeKids.length > 0 ? Math.round(totalPercent / activeKids.length) : 0;
 
   return (
     <>
       <Header />
       <div id="home-view">
+        {activeKids.length > 0 && (
+          <div id="group-stats-bar">
+            <span className="group-stat"><strong>{groupRate}%</strong> group progress</span>
+            <span className="group-stat-divider">·</span>
+            <span className="group-stat"><strong>{goalsAchieved}/{activeKids.length}</strong> goals achieved</span>
+            {goalConfig.reward && (
+              <>
+                <span className="group-stat-divider">·</span>
+                <span className="group-stat">{goalConfig.reward}</span>
+              </>
+            )}
+          </div>
+        )}
+
         {sorted.length === 0 ? (
           <div id="empty-state">
             <div id="empty-state-icon"></div>
             <h2>Welcome to Doneski!</h2>
-            <p>No goals are set up yet. Head to <strong>Manage People</strong> in the Dashboard to add your first person and configure their task and reward.</p>
+            <p>No goals are set up yet. Head to <strong>Manage People</strong> to add your first person and configure their task and reward.</p>
             <button id="empty-state-btn" onClick={() => navigate("/settings")}>Get Started</button>
           </div>
         ) : (
@@ -67,8 +89,10 @@ export default function HomeView() {
             ))}
           </div>
         )}
-        <div id="dashboard-btn-wrap">
-          <button id="open-dashboard-btn" onClick={() => navigate("/dashboard")}>Dashboard</button>
+
+        <div id="home-footer-actions">
+          <button className="home-action-btn" onClick={() => navigate("/settings")}>Manage People</button>
+          <button className="home-action-btn home-action-btn--ghost" onClick={signOut}>Sign Out</button>
         </div>
       </div>
       <Footer />

@@ -119,6 +119,7 @@ function GoalSettingsForm({ goalConfig, onSave }) {
 // ─── Kid Inline Edit Form ─────────────────────────────────────────────────────
 
 function KidInlineEditForm({ kid, onSave, onCancel }) {
+  const { createKidAccount, resetKidPassword } = useApp();
   const [name, setName] = useState(kid.name);
   const [dob, setDob] = useState(kid.dob || "");
   const [chore, setChore] = useState(kid.chores.join(", "));
@@ -128,12 +129,64 @@ function KidInlineEditForm({ kid, onSave, onCancel }) {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(kid.photo || null);
 
+  // Login creation state
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginSaving, setLoginSaving] = useState(false);
+
+  // Password reset state
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetCurrent, setResetCurrent] = useState("");
+  const [resetNew, setResetNew] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetSaving, setResetSaving] = useState(false);
+
   const isDirty = photoFile ||
     name !== kid.name ||
     dob !== (kid.dob || "") ||
     chore !== kid.chores.join(", ") ||
     reward !== (kid.reward || "") ||
     pin !== (kid.pin || "");
+
+  async function handleResetPassword() {
+    if (!resetCurrent) { setResetError("Enter the current password."); return; }
+    if (resetNew.length < 6) { setResetError("New password must be at least 6 characters."); return; }
+    setResetError("");
+    setResetSaving(true);
+    try {
+      await resetKidPassword(kid.username, resetCurrent, resetNew);
+      setShowResetForm(false);
+      setResetCurrent("");
+      setResetNew("");
+    } catch (err) {
+      const code = err.code || "";
+      setResetError(
+        code === "auth/wrong-password" || code === "auth/invalid-credential"
+          ? "Current password is incorrect."
+          : "Something went wrong. Try again."
+      );
+    }
+    setResetSaving(false);
+  }
+
+  async function handleCreateLogin() {
+    if (!loginUsername.trim()) { setLoginError("Username is required."); return; }
+    if (loginPassword.length < 6) { setLoginError("Password must be at least 6 characters."); return; }
+    setLoginError("");
+    setLoginSaving(true);
+    try {
+      await createKidAccount(kid.id, loginUsername.trim(), loginPassword);
+      setShowLoginForm(false);
+      setLoginUsername("");
+      setLoginPassword("");
+    } catch (err) {
+      const code = err.code || "";
+      setLoginError(code === "auth/email-already-in-use" ? "That username is already taken." : "Something went wrong. Try again.");
+    }
+    setLoginSaving(false);
+  }
 
   function handlePhoto(e) {
     const file = e.target.files[0];
@@ -201,6 +254,65 @@ function KidInlineEditForm({ kid, onSave, onCancel }) {
             {showPin ? "Hide" : "Show"}
           </button>
         </div>
+      </div>
+      <div className="form-field">
+        <label>Login</label>
+        {kid.uid ? (
+          <div className="login-status-wrap">
+            <p className="login-status-text">Active — username: <strong>{kid.username}</strong></p>
+            {showResetForm ? (
+              <div className="kid-login-form">
+                <input
+                  type="password"
+                  placeholder="Current password"
+                  value={resetCurrent}
+                  onChange={e => setResetCurrent(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="New password (min 6 chars)"
+                  value={resetNew}
+                  onChange={e => setResetNew(e.target.value)}
+                />
+                {resetError && <p className="login-field-error">{resetError}</p>}
+                <div className="kid-login-form-buttons">
+                  <button type="button" className="btn-inline-save" disabled={resetSaving} onClick={handleResetPassword}>
+                    {resetSaving ? "Saving…" : "Update Password"}
+                  </button>
+                  <button type="button" className="btn-inline-cancel" onClick={() => { setShowResetForm(false); setResetError(""); }}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" className="btn-setup-login" onClick={() => setShowResetForm(true)}>Reset Password</button>
+            )}
+          </div>
+        ) : showLoginForm ? (
+          <div className="kid-login-form">
+            <input
+              type="text"
+              placeholder="Username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              value={loginUsername}
+              onChange={e => setLoginUsername(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password (min 6 chars)"
+              value={loginPassword}
+              onChange={e => setLoginPassword(e.target.value)}
+            />
+            {loginError && <p className="login-field-error">{loginError}</p>}
+            <div className="kid-login-form-buttons">
+              <button type="button" className="btn-inline-save" disabled={loginSaving} onClick={handleCreateLogin}>
+                {loginSaving ? "Creating…" : "Create Login"}
+              </button>
+              <button type="button" className="btn-inline-cancel" onClick={() => { setShowLoginForm(false); setLoginError(""); }}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="btn-setup-login" onClick={() => setShowLoginForm(true)}>Set Up Login</button>
+        )}
       </div>
       <div className="inline-form-buttons">
         <button className="btn-inline-save" disabled={!isDirty} onClick={handleSave}>Save</button>
@@ -406,7 +518,7 @@ export default function SettingsView() {
     <>
       <Header />
       <div id="settings-view">
-        <button id="settings-back-btn" onClick={() => navigate("/dashboard")}>← Back</button>
+        <button id="settings-back-btn" onClick={() => navigate("/")}>← Back</button>
 
         <section>
           <h2>People</h2>
